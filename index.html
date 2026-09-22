@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погодний дашборд</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -33,15 +33,15 @@
     <section id="forecast">
         <h2>Прогноз на тиждень</h2>
 
-        <article>
+        <article class="card">
             <h3>Вівторок</h3>
-            <p>+18&deg;C, хмарно</p>
+            <p><span class="temp">+18&deg;C</span>, хмарно</p>
             <img src="assets/img/cloud.svg" alt="Іконка: хмарно">
         </article>
 
-        <article>
+        <article class="card">
             <h3>Середа</h3>
-            <p>+16&deg;C, дощ</p>
+            <p><span class="temp">+16&deg;C</span>, дощ</p>
             <img src="assets/img/rain.svg" alt="Іконка: дощ">
         </article>
     </section>
@@ -51,7 +51,6 @@
     <h2>Порада дня</h2>
     <p>Сьогодні сонячно, не забудь сонцезахисні окуляри!</p>
 </aside>
-
 
 <footer>
     <p>Джерело даних: OpenWeatherMap. Навчальний проєкт, 2026.</p>
