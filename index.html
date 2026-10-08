@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погодний дашборд</title>
-    <!-- Підключення шрифту Nunito -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -19,17 +18,16 @@
 </header>
 
 <main>
-    <!-- Обгортка top-section для десктопного макета (поруч погода і порада) -->
     <div class="top-section">
         <section id="current">
             <h2>Поточна погода</h2>
             <label for="city-search">Пошук міста:</label>
             <input type="text" id="city-search" name="city">
+            <!-- Поточна погода вважається теплою -->
             <p>+21&deg;C, сонячно</p>
             <img src="assets/img/sun.svg" alt="Іконка: сонячно, без опадів">
         </section>
 
-        <!-- Aside перенесено сюди, щоб стояти поруч із поточною погодою -->
         <aside>
             <h2>Порада дня</h2>
             <p>Сьогодні сонячно, не забудь сонцезахисні окуляри!</p>
@@ -38,41 +36,40 @@
 
     <section id="forecast">
         <h2>Прогноз на тиждень</h2>
-        <!-- Обгортка cards для сітки CSS Grid -->
         <div class="cards">
             <article class="card">
                 <h3>Понеділок</h3>
-                <p><span class="temp">+20&deg;C</span>, ясно</p>
+                <p><span class="temp temp-warm">+20&deg;C</span>, ясно</p>
                 <img src="assets/img/sun.svg" alt="Іконка: ясно">
             </article>
             <article class="card">
                 <h3>Вівторок</h3>
-                <p><span class="temp">+18&deg;C</span>, хмарно</p>
+                <p><span class="temp temp-warm">+18&deg;C</span>, хмарно</p>
                 <img src="assets/img/cloud.svg" alt="Іконка: хмарно">
             </article>
             <article class="card">
                 <h3>Середа</h3>
-                <p><span class="temp">+16&deg;C</span>, дощ</p>
+                <p><span class="temp temp-cold">+16&deg;C</span>, дощ</p>
                 <img src="assets/img/rain.svg" alt="Іконка: дощ">
             </article>
             <article class="card">
                 <h3>Четвер</h3>
-                <p><span class="temp">+17&deg;C</span>, хмарно</p>
+                <p><span class="temp temp-cold">+17&deg;C</span>, хмарно</p>
                 <img src="assets/img/cloud.svg" alt="Іконка: хмарно">
             </article>
             <article class="card">
                 <h3>П'ятниця</h3>
-                <p><span class="temp">+19&deg;C</span>, ясно</p>
+                <p><span class="temp temp-warm">+19&deg;C</span>, ясно</p>
                 <img src="assets/img/sun.svg" alt="Іконка: ясно">
             </article>
             <article class="card">
                 <h3>Субота</h3>
-                <p><span class="temp">+22&deg;C</span>, сонячно</p>
+                <p><span class="temp temp-hot">+30&deg;C</span>, сонячно</p>
                 <img src="assets/img/sun.svg" alt="Іконка: сонячно">
             </article>
             <article class="card">
                 <h3>Неділя</h3>
-                <p><span class="temp">+21&deg;C</span>, гроза</p>
+                <p><span class="temp temp-warm">+21&deg;C</span>, гроза</p>
                 <img src="assets/img/rain.svg" alt="Іконка: гроза">
             </article>
         </div>
