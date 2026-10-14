@@ -17,7 +17,9 @@ img {
 
 /* --- ШАПКА --- */
 header {
-    background: linear-gradient(to right, #0284c7, #38bdf8);
+    /* Було: linear-gradient(to right, #0284c7, #38bdf8) */
+    /* Стало темнішим для контрасту > 4.5:1 з білим текстом: */
+    background: linear-gradient(to right, #1e40af, #0369a1);
     color: white;
     padding: 24px;
     display: flex;
@@ -60,8 +62,9 @@ h2 {
 
 /* --- ПОТОЧНА ПОГОДА (Чітка вимога) --- */
 #current {
-    background-color: #1e40af; /* Відтінок синього згідно з варіантом */
-    color: #ffffff; /* Білий текст для контрасту ≥ 4.5:1 */
+    /* Ідеальний колір у межах #123069 - #2E5A8C */
+    background-color: #20457A;
+    color: #ffffff;
     border-radius: 12px;
     padding: 24px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
