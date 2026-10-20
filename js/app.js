@@ -1,40 +1,76 @@
-// Крок 3: Перевірка підключення файлу
-console.log('app.js підключено');
-
-// Крок 4: Оголошення даних (масив об'єктів згідно з Варіантом 1)
-const forecast = [
-    { day: 'Пн', temp: 20 },
-    { day: 'Вт', temp: 18 },
-    { day: 'Ср', temp: 16 },
-    { day: 'Чт', temp: 17 },
-    { day: 'Пт', temp: -2 }, // Мінусова температура для перевірки умови
-    { day: 'Сб', temp: 22 },
-    { day: 'Нд', temp: -5 }  // Ще один морозний день
+// Додали назви файлів іконок у наші дані
+const forecastData = [
+    { day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg' },
+    { day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg' },
+    { day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg' },
+    { day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg' },
+    { day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg' },
+    { day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg' },
+    { day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg' }
 ];
 
-// Крок 7: Стрілкова функція для переведення °C у °F
-const toFahrenheit = c => c * 9 / 5 + 32;
+const listContainer = document.querySelector('#forecast-cards');
+const avgTempElement = document.querySelector('#avg-temp');
 
-// Крок 5: Функція, яка циклом обробляє масив
-function processForecast() {
-    // Використовуємо цикл for...of для перебору днів
-    for (const item of forecast) {
+function renderForecast(forecastArray) {
+    const oldCards = listContainer.querySelectorAll('.card');
+    for (const oldCard of oldCards) {
+        oldCard.remove();
+    }
 
-        // Викликаємо стрілкову функцію для конвертації температури
-        const tempF = toFahrenheit(item.temp);
+    let sumTemp = 0;
 
-        // Формуємо базовий текст за допомогою рядкових шаблонів
-        let message = `Погода в ${item.day}: ${item.temp}°C (або ${tempF}°F)`;
+    for (const item of forecastArray) {
+        const card = document.createElement('article');
+        const title = document.createElement('h3');
+        const details = document.createElement('p');
 
-        // Крок 6: Умовна класифікація (якщо менше нуля - морозно)
-        if (item.temp < 0) {
-            message += ' — морозно!';
+        const img = document.createElement('img');
+        img.setAttribute('src', `assets/img/${item.icon}`);
+        img.setAttribute('alt', `Іконка: ${item.description}`);
+
+        img.style.width = '64px';
+        img.style.display = 'block';
+        img.style.margin = '10px auto 0';
+
+        card.classList.add('card');
+        title.textContent = item.day;
+
+        // --- ПОВЕРТАЄМО КОЛЬОРИ ---
+        // 1. Створюємо окремий елемент span для температури
+        const tempSpan = document.createElement('span');
+        const sign = item.tempC > 0 ? '+' : '';
+        tempSpan.textContent = `${sign}${item.tempC}°C`;
+        tempSpan.style.fontWeight = 'bold'; // Жирний шрифт
+        tempSpan.style.fontSize = '32px'; // Розмір шрифту
+
+        tempSpan.style.display = 'block'; // Переносить опис на наступний рядок
+
+        // 2. Додаємо кольори, які ти підбирала у звіті (Крок 7)
+        if (item.tempC >= 25) {
+            tempSpan.style.color = '#B91C1C'; // Спекотна погода (червоний)
+        } else if (item.tempC >= 18) {
+            tempSpan.style.color = '#A16207'; // Тепла погода (золотисто-жовтий)
+        } else {
+            tempSpan.style.color = '#0369A1'; // Прохолодна/морозна погода (синій)
         }
 
-        // Виводимо фінальний результат у консоль
-        console.log(message);
+        // 3. Збираємо параграф до купи: спан з температурою + пробіл + опис (без коми)
+        details.append(tempSpan, ` ${item.description}`);
+        // --------------------------
+
+        if (item.tempC < 0) {
+            card.classList.add('cold');
+        }
+
+        card.append(title, details, img);
+        listContainer.append(card);
+
+        sumTemp += item.tempC;
     }
+
+    const avgTemp = Math.round(sumTemp / forecastArray.length);
+    avgTempElement.textContent = `Середня температура за тиждень: ${avgTemp}°C`;
 }
 
-// Запускаємо нашу функцію
-processForecast();
+renderForecast(forecastData);

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Хмарка -->
+    <path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"></path>
+
+    <!-- Тонкі сніжинки -->
+    <g stroke-width="1">
+        <!-- Ліва сніжинка -->
+        <path d="M7 16v3 M5.5 16.7l3 1.6 M5.5 18.3l3-1.6"></path>
+
+        <!-- Центральна сніжинка -->
+        <path d="M12 18.5v3 M10.5 19.2l3 1.6 M10.5 20.8l3-1.6"></path>
+
+        <!-- Права сніжинка -->
+        <path d="M17 16v3 M15.5 16.7l3 1.6 M15.5 18.3l3-1.6"></path>
+    </g>
+</svg>

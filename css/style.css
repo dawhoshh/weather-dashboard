@@ -199,3 +199,8 @@ footer {
         margin-bottom: 0;
     }
 }
+/* Клас для морозних днів, додається динамічно через JS */
+.card.cold {
+    border: 2px solid #0284c7;
+    background-color: #f0f9ff;
+}

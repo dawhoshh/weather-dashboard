@@ -37,7 +37,11 @@
 
     <section id="forecast">
         <h2>Прогноз на тиждень</h2>
-        <div class="cards">
+        <!-- Додаємо параграф для виведення середньої температури -->
+        <p id="avg-temp" style="font-weight: bold; margin-bottom: 15px;"></p>
+
+        <!-- Додаємо id="forecast-cards", щоб легко знайти контейнер у JS -->
+        <div id="forecast-cards" class="cards">
             <article class="card">
                 <h3>Понеділок</h3>
                 <p><span class="temp temp-warm">+20&deg;C</span> ясно</p>
