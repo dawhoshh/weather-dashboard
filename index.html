@@ -79,6 +79,31 @@
             </article>
         </div>
     </section>
+    <section id="add-weather" style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px;">
+        <h2>Додати новий прогноз</h2>
+        <form id="weather-form">
+            <label for="day-input">День (скорочено):</label>
+            <input type="text" id="day-input" name="day" required
+                   pattern="Пн|Вт|Ср|Чт|Пт|Сб|Нд"
+                   title="Введіть день строго у форматі: Пн, Вт, Ср, Чт, Пт, Сб або Нд">
+
+            <label for="temp-input">Температура (°C):</label>
+            <input type="number" id="temp-input" name="tempC" required>
+
+            <label for="desc-input">Опис:</label>
+            <input type="text" id="desc-input" name="description" required
+                   pattern="ясно|хмарно|дощ|сніг|мороз|сонячно"
+                   title="Дозволені значення: ясно, хмарно, дощ, сніг, мороз, сонячно">
+
+            <button type="submit">Додати</button>
+        </form>
+
+        <hr style="margin: 20px 0;">
+
+        <!-- Індивідуальна друга подія варіанта 1 -->
+        <button id="warmest-day-btn">Знайти найтепліший день</button>
+        <p id="warmest-day-result" style="font-weight: bold; margin-top: 10px;"></p>
+    </section>
 </main>
 
 <footer>

@@ -74,3 +74,71 @@ function renderForecast(forecastArray) {
 }
 
 renderForecast(forecastData);
+
+// 1. Вибираємо форму та інші елементи
+const weatherForm = document.querySelector('#weather-form');
+const tempInput = document.querySelector('#temp-input');
+const warmestBtn = document.querySelector('#warmest-day-btn');
+const warmestResult = document.querySelector('#warmest-day-result');
+
+// 2. Додаткова валідація на подію 'input' (Крок 8)
+tempInput.addEventListener('input', () => {
+    const tempValue = Number(tempInput.value);
+    // Перевіряємо, чи температура в межах від -50 до +50
+    if (tempInput.value !== '' && (tempValue < -50 || tempValue > 50)) {
+        tempInput.setCustomValidity('Температура поза реалістичним діапазоном (-50...50)');
+    } else {
+        tempInput.setCustomValidity(''); // Скидаємо помилку, якщо все добре
+    }
+});
+
+
+// 3. Обробка надсилання форми (подія 'submit')
+weatherForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const day = document.querySelector('#day-input').value.trim();
+    const tempC = Number(tempInput.value);
+    const description = document.querySelector('#desc-input').value.trim();
+
+    // Автоматично підбираємо іконку залежно від введеного опису
+    let autoIcon = 'sun.svg'; // за замовчуванням
+    const descLower = description.toLowerCase();
+
+    if (descLower === 'ясно' || descLower === 'сонячно') {
+        autoIcon = 'sun.svg';
+    } else if (descLower === 'хмарно' || descLower === 'мороз') {
+        autoIcon = 'cloud.svg';
+    } else if (descLower === 'дощ') {
+        autoIcon = 'rain.svg';
+    } else if (descLower === 'сніг') {
+        autoIcon = 'snow.svg';
+    }
+
+    const newForecast = {
+        day: day,
+        tempC: tempC,
+        description: description,
+        icon: autoIcon // передаємо автоматично підібрану іконку
+    };
+
+    forecastData.push(newForecast);
+    renderForecast(forecastData);
+    weatherForm.reset();
+});
+
+// 4. Друга подія варіанта 1: клік по кнопці «Найтепліший день»
+warmestBtn.addEventListener('click', () => {
+    if (forecastData.length === 0) return;
+
+    // Знаходимо об'єкт із максимальною температурою
+    let warmest = forecastData[0];
+    for (const item of forecastData) {
+        if (item.tempC > warmest.tempC) {
+            warmest = item;
+        }
+    }
+
+    // Виводимо результат у окремий елемент
+    warmestResult.textContent = `Найтепліший день: ${warmest.day} (${warmest.tempC}°C, ${warmest.description})`;
+});
