@@ -1,12 +1,12 @@
 // Додали назви файлів іконок у наші дані
 const forecastData = [
-    { day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg' },
-    { day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg' },
-    { day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg' },
-    { day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg' },
-    { day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg' },
-    { day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg' },
-    { day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg' }
+    {day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg'},
+    {day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg'},
+    {day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg'},
+    {day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg'},
+    {day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg'},
+    {day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg'},
+    {day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg'}
 ];
 
 const listContainer = document.querySelector('#forecast-cards');
@@ -142,3 +142,91 @@ warmestBtn.addEventListener('click', () => {
     // Виводимо результат у окремий елемент
     warmestResult.textContent = `Найтепліший день: ${warmest.day} (${warmest.tempC}°C, ${warmest.description})`;
 });
+
+// 1. Знаходимо необхідні елементи на сторінці
+const loadApiBtn = document.querySelector('#load-api-btn');
+const loadingStatus = document.querySelector('#loading-status');
+const errorStatus = document.querySelector('#error-status');
+
+// 2. URL для Варіанта 1 (Київ, поточна температура, код погоди та час)[cite: 21]
+const API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=50.45&longitude=30.52&current=temperature_2m,weather_code&timezone=auto';
+
+// 3. Об'єкт-словник для перетворення числового коду погоди у текст[cite: 21]
+const weatherCodesMap = {
+    0: 'ясно',
+    1: 'ясно',
+    2: 'хмарно',
+    3: 'хмарно',
+    45: 'туман',
+    48: 'туман',
+    51: 'дощ',
+    61: 'дощ',
+    71: 'сніг',
+    95: 'гроза'
+};
+
+// 4. Головна асинхронна функція для отримання даних[cite: 20]
+async function loadData() {
+    // Показуємо стан завантаження, ховаємо попередні помилки, блокуємо кнопку[cite: 20]
+    loadingStatus.style.display = 'block';
+    errorStatus.style.display = 'none';
+    loadApiBtn.disabled = true;
+
+    try {
+        // Виконуємо запит на сервер і чекаємо на відповідь[cite: 20]
+        const response = await fetch(API_URL);
+
+        // Перевіряємо HTTP-статус (якщо 404 або 500 - кидаємо помилку)[cite: 20]
+        if (!response.ok) {
+            throw new Error(`Помилка сервера: ${response.status}`);
+        }
+
+        // Розбираємо JSON-відповідь[cite: 20]
+        const data = await response.json();
+        console.log('Дані з API:', data); // виводимо в консоль для перевірки[cite: 20]
+
+        // Витягуємо температуру, код погоди та час[cite: 21]
+        const currentTemp = data.current.temperature_2m;
+        const code = data.current.weather_code;
+        const timeString = data.current.time;
+
+        // Форматуємо час, щоб залишити тільки години та хвилини (наприклад, 23:00)
+        const dateObj = new Date(timeString);
+        const formattedTime = dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+        // Отримуємо текстовий опис погоди зі словника (або 'хмарно' за замовчуванням)[cite: 21]
+        const desc = weatherCodesMap[code] || 'хмарно';
+
+        // Автоматично підбираємо відповідну іконку
+        let autoIcon = 'cloud.svg';
+        if (desc === 'ясно') autoIcon = 'sun.svg';
+        else if (desc === 'дощ' || desc === 'гроза') autoIcon = 'rain.svg';
+        else if (desc === 'сніг') autoIcon = 'snow.svg';
+
+        // Формуємо масив з одним об'єктом для рендеру
+        const apiForecast = [{
+            day: `Зараз (${formattedTime})`,
+            tempC: Math.round(currentTemp),
+            description: desc,
+            icon: autoIcon
+        }];
+
+        // Викликаємо функцію з 7-ї практичної для малювання картки на сторінці[cite: 20]
+        renderForecast(apiForecast);
+
+    } catch (error) {
+        // Перехоплюємо помилки мережі (офлайн) або наші власні помилки статусу[cite: 20]
+        console.error('Сталася помилка:', error);
+
+        // Виводимо конкретне повідомлення згідно з Варіантом 1[cite: 21]
+        errorStatus.textContent = 'Не вдалося отримати прогноз погоди';
+        errorStatus.style.display = 'block';
+    } finally {
+        // Вимикаємо стан завантаження і розблоковуємо кнопку незалежно від результату[cite: 20]
+        loadingStatus.style.display = 'none';
+        loadApiBtn.disabled = false;
+    }
+}
+
+// 5. Прив'язуємо клік по кнопці до запуску функції[cite: 20]
+loadApiBtn.addEventListener('click', loadData);

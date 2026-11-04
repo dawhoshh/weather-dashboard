@@ -104,6 +104,20 @@
         <button id="warmest-day-btn">Знайти найтепліший день</button>
         <p id="warmest-day-result" style="font-weight: bold; margin-top: 10px;"></p>
     </section>
+    <section id="api-section" style="margin: 20px 0; padding: 15px; border: 1px solid #0369A1; border-radius: 8px; text-align: center;">
+        <h2>Реальна погода в Києві (Open-Meteo API)</h2>
+
+        <!-- Кнопка «Оновити» -->
+        <button id="load-api-btn" style="padding: 10px 20px; font-weight: bold; cursor: pointer;">
+            Дізнатися погоду зараз
+        </button>
+
+        <!-- Елементи для стану завантаження та помилки -->
+        <p id="loading-status" style="display: none; color: #A16207; font-weight: bold; margin-top: 10px;">
+            ⏳ Завантаження даних з сервера...
+        </p>
+        <p id="error-status" style="display: none; color: #B91C1C; font-weight: bold; margin-top: 10px;"></p>
+    </section>
 </main>
 
 <footer>
