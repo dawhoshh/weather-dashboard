@@ -1,79 +1,148 @@
-// Додали назви файлів іконок у наші дані
-const forecastData = [
-    {day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg'},
-    {day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg'},
-    {day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg'},
-    {day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg'},
-    {day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg'},
-    {day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg'},
-    {day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg'}
-];
+// Крок 7: Ручний рендер через DOM API (практикум 7) закоментовано,
+// оскільки відображення списку карток перенесено на компонент WeatherCard у Vue 3.
+// const forecastData = [
+//     {day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg'},
+//     {day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg'},
+//     {day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg'},
+//     {day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg'},
+//     {day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg'},
+//     {day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg'},
+//     {day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg'}
+// ];
+//
+// const listContainer = document.querySelector('#forecast-cards');
+// const avgTempElement = document.querySelector('#avg-temp');
+//
+// function renderForecast(forecastArray) {
+//     const oldCards = listContainer.querySelectorAll('.card');
+//     for (const oldCard of oldCards) {
+//         oldCard.remove();
+//     }
+//
+//     let sumTemp = 0;
+//
+//     for (const item of forecastArray) {
+//         const card = document.createElement('article');
+//         const title = document.createElement('h3');
+//         const details = document.createElement('p');
+//
+//         const img = document.createElement('img');
+//         img.setAttribute('src', `assets/img/${item.icon}`);
+//         img.setAttribute('alt', `Іконка: ${item.description}`);
+//
+//         img.style.width = '64px';
+//         img.style.display = 'block';
+//         img.style.margin = '10px auto 0';
+//
+//         card.classList.add('card');
+//         title.textContent = item.day;
+//
+//         // --- ПОВЕРТАЄМО КОЛЬОРИ ---
+//         // 1. Створюємо окремий елемент span для температури
+//         const tempSpan = document.createElement('span');
+//         const sign = item.tempC > 0 ? '+' : '';
+//         tempSpan.textContent = `${sign}${item.tempC}°C`;
+//         tempSpan.style.fontWeight = 'bold'; // Жирний шрифт
+//         tempSpan.style.fontSize = '32px'; // Розмір шрифту
+//
+//         tempSpan.style.display = 'block'; // Переносить опис на наступний рядок
+//
+//         // 2. Додаємо кольори, які ти підбирала у звіті (Крок 7)
+//         if (item.tempC >= 25) {
+//             tempSpan.style.color = '#B91C1C'; // Спекотна погода (червоний)
+//         } else if (item.tempC >= 18) {
+//             tempSpan.style.color = '#A16207'; // Тепла погода (золотисто-жовтий)
+//         } else {
+//             tempSpan.style.color = '#0369A1'; // Прохолодна/морозна погода (синій)
+//         }
+//
+//         // 3. Збираємо параграф до купи: спан з температурою + пробіл + опис (без коми)
+//         details.append(tempSpan, ` ${item.description}`);
+//         // --------------------------
+//
+//         if (item.tempC < 0) {
+//             card.classList.add('cold');
+//         }
+//
+//         card.append(title, details, img);
+//         listContainer.append(card);
+//
+//         sumTemp += item.tempC;
+//     }
+//
+//     const avgTemp = Math.round(sumTemp / forecastArray.length);
+//     avgTempElement.textContent = `Середня температура за тиждень: ${avgTemp}°C`;
+// }
 
-const listContainer = document.querySelector('#forecast-cards');
-const avgTempElement = document.querySelector('#avg-temp');
+// renderForecast(forecastData);
 
-function renderForecast(forecastArray) {
-    const oldCards = listContainer.querySelectorAll('.card');
-    for (const oldCard of oldCards) {
-        oldCard.remove();
-    }
+// Крок 1: Обрано фреймворк Vue 3, оскільки він підключається через CDN
+// одним тегом <script> без потреби у Babel та збірці проєкту.
 
-    let sumTemp = 0;
-
-    for (const item of forecastArray) {
-        const card = document.createElement('article');
-        const title = document.createElement('h3');
-        const details = document.createElement('p');
-
-        const img = document.createElement('img');
-        img.setAttribute('src', `assets/img/${item.icon}`);
-        img.setAttribute('alt', `Іконка: ${item.description}`);
-
-        img.style.width = '64px';
-        img.style.display = 'block';
-        img.style.margin = '10px auto 0';
-
-        card.classList.add('card');
-        title.textContent = item.day;
-
-        // --- ПОВЕРТАЄМО КОЛЬОРИ ---
-        // 1. Створюємо окремий елемент span для температури
-        const tempSpan = document.createElement('span');
-        const sign = item.tempC > 0 ? '+' : '';
-        tempSpan.textContent = `${sign}${item.tempC}°C`;
-        tempSpan.style.fontWeight = 'bold'; // Жирний шрифт
-        tempSpan.style.fontSize = '32px'; // Розмір шрифту
-
-        tempSpan.style.display = 'block'; // Переносить опис на наступний рядок
-
-        // 2. Додаємо кольори, які ти підбирала у звіті (Крок 7)
-        if (item.tempC >= 25) {
-            tempSpan.style.color = '#B91C1C'; // Спекотна погода (червоний)
-        } else if (item.tempC >= 18) {
-            tempSpan.style.color = '#A16207'; // Тепла погода (золотисто-жовтий)
-        } else {
-            tempSpan.style.color = '#0369A1'; // Прохолодна/морозна погода (синій)
+const WeatherCard = {
+    props: ['day', 'tempC', 'description', 'icon'],
+    data() {
+        return {
+            showFahrenheit: false
+        };
+    },
+    computed: {
+        // Похідне значення: температура у Фаренгейтах
+        tempF() {
+            return Math.round(this.tempC * 9 / 5 + 32);
+        },
+        // Похідне значення: клас кольору температури зі style.css
+        tempColorClass() {
+            if (this.tempC >= 25) return 'temp-hot';
+            if (this.tempC >= 18) return 'temp-warm';
+            return 'temp-cold';
         }
-
-        // 3. Збираємо параграф до купи: спан з температурою + пробіл + опис (без коми)
-        details.append(tempSpan, ` ${item.description}`);
-        // --------------------------
-
-        if (item.tempC < 0) {
-            card.classList.add('cold');
+    },
+    methods: {
+        toggleFahrenheit() {
+            this.showFahrenheit = !this.showFahrenheit;
         }
+    },
+    template: `
+        <article :class="['card', { cold: tempC < 0 }]" @click="toggleFahrenheit" style="cursor: pointer;" title="Натисніть, щоб показати/сховати °F">
+            <h3>{{ day }}</h3>
+            <p>
+                <span :class="['temp', tempColorClass]">
+                    {{ tempC > 0 ? '+' + tempC : tempC }}°C
+                    <span v-if="showFahrenheit"> ({{ tempF }}°F)</span>
+                </span>
+                {{ description }}
+            </p>
+            <img :src="'assets/img/' + icon" :alt="'Іконка: ' + description">
+        </article>
+    `
+};
 
-        card.append(title, details, img);
-        listContainer.append(card);
-
-        sumTemp += item.tempC;
+const vueApp = Vue.createApp({
+    components: {
+        WeatherCard
+    },
+    data() {
+        return {
+            forecastData: [
+                { id: 1, day: 'Пн', tempC: 20, description: 'ясно', icon: 'sun.svg' },
+                { id: 2, day: 'Вт', tempC: 18, description: 'хмарно', icon: 'cloud.svg' },
+                { id: 3, day: 'Ср', tempC: 16, description: 'дощ', icon: 'rain.svg' },
+                { id: 4, day: 'Чт', tempC: 17, description: 'хмарно', icon: 'cloud.svg' },
+                { id: 5, day: 'Пт', tempC: -2, description: 'мороз', icon: 'cloud.svg' },
+                { id: 6, day: 'Сб', tempC: 30, description: 'сонячно', icon: 'sun.svg' },
+                { id: 7, day: 'Нд', tempC: -5, description: 'сніг', icon: 'snow.svg' }
+            ]
+        };
+    },
+    computed: {
+        avgTemp() {
+            if (this.forecastData.length === 0) return 0;
+            const sum = this.forecastData.reduce((acc, item) => acc + item.tempC, 0);
+            return Math.round(sum / this.forecastData.length);
+        }
     }
-
-    const avgTemp = Math.round(sumTemp / forecastArray.length);
-    avgTempElement.textContent = `Середня температура за тиждень: ${avgTemp}°C`;
-}
-
-renderForecast(forecastData);
+}).mount('#forecast');
 
 // 1. Вибираємо форму та інші елементи
 const weatherForm = document.querySelector('#weather-form');
@@ -122,18 +191,17 @@ weatherForm.addEventListener('submit', (event) => {
         icon: autoIcon // передаємо автоматично підібрану іконку
     };
 
-    forecastData.push(newForecast);
-    renderForecast(forecastData);
+    vueApp.forecastData.push({ id: Date.now(), ...newForecast });
     weatherForm.reset();
 });
 
 // 4. Друга подія варіанта 1: клік по кнопці «Найтепліший день»
 warmestBtn.addEventListener('click', () => {
-    if (forecastData.length === 0) return;
+    if (vueApp.forecastData.length === 0) return;
 
     // Знаходимо об'єкт із максимальною температурою
-    let warmest = forecastData[0];
-    for (const item of forecastData) {
+    let warmest = vueApp.forecastData[0];
+    for (const item of vueApp.forecastData) {
         if (item.tempC > warmest.tempC) {
             warmest = item;
         }
@@ -211,8 +279,7 @@ async function loadData() {
             icon: autoIcon
         }];
 
-        // Викликаємо функцію з 7-ї практичної для малювання картки на сторінці[cite: 20]
-        renderForecast(apiForecast);
+        vueApp.forecastData = [{ id: Date.now(), ...apiForecast[0] }];
 
     } catch (error) {
         // Перехоплюємо помилки мережі (офлайн) або наші власні помилки статусу[cite: 20]
