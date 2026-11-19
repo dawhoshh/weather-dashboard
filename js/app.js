@@ -297,3 +297,265 @@ async function loadData() {
 
 // 5. Прив'язуємо клік по кнопці до запуску функції[cite: 20]
 loadApiBtn.addEventListener('click', loadData);
+
+
+// КОД ДЛЯ 11-Ї ПРАКТИЧНОЇ (localStorage / IndexedDB)
+const LS_CITIES_KEY = 'savedCities';
+const LS_MIGRATED_KEY = 'citiesMigrated';
+const DB_NAME = 'WeatherDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'cities';
+
+const cityForm = document.querySelector('#city-form');
+const savedCitiesList = document.querySelector('#saved-cities-list');
+const dbErrorEl = document.querySelector('#db-error');
+
+// --- Крок 2: Робота з localStorage (із захистом try/catch) ---
+function saveToLocalStorage(items) {
+    localStorage.setItem(LS_CITIES_KEY, JSON.stringify(items));
+}
+
+function loadFromLocalStorage() {
+    try {
+        const raw = localStorage.getItem(LS_CITIES_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch (error) {
+        console.error('Пошкоджені дані в localStorage:', error);
+        return [];
+    }
+}
+
+// --- Крок 5–6: Відкриття IndexedDB та створення сховища "cities" ---
+function openDB() {
+    return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+            reject(new Error('IndexedDB не підтримується вашим браузером'));
+            return;
+        }
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// --- Крок 7: CRUD-функції для IndexedDB ---
+// Додавання або оновлення міста (put)
+async function saveCity(city) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(city);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+// Отримання всіх збережених міст (getAll)
+async function getAllCities() {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const request = tx.objectStore(STORE_NAME).getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Видалення міста за id (delete)
+async function deleteCity(id) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+    });
+}
+
+// --- Крок 8: Одноразова міграція з localStorage в IndexedDB ---
+async function migrateFromLocalStorage() {
+    if (localStorage.getItem(LS_MIGRATED_KEY) === 'true') {
+        return;
+    }
+
+    const existingInDB = await getAllCities();
+    let lsCities = loadFromLocalStorage();
+
+    // Якщо localStorage порожній на першому запуску — додаємо Київ для демонстрації
+    if (lsCities.length === 0 && existingInDB.length === 0) {
+        lsCities = [{
+            id: 1,
+            name: 'Київ',
+            lat: 50.45,
+            lon: 30.52,
+            temperature: null,
+            weatherCode: null,
+            time: null
+        }];
+        saveToLocalStorage(lsCities);
+    }
+
+    if (existingInDB.length === 0 && lsCities.length > 0) {
+        for (const city of lsCities) {
+            await saveCity(city);
+        }
+        localStorage.setItem(LS_MIGRATED_KEY, 'true');
+        console.log('Міграцію з localStorage в IndexedDB виконано успішно.');
+    }
+}
+
+// --- Отримання свіжого прогнозу для конкретного міста через Open-Meteo ---
+async function fetchCityWeather(city) {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code&timezone=auto`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return city;
+        const data = await response.json();
+
+        const updatedCity = {
+            ...city,
+            temperature: Math.round(data.current.temperature_2m),
+            weatherCode: data.current.weather_code,
+            time: data.current.time
+        };
+        await saveCity(updatedCity);
+        return updatedCity;
+    } catch (error) {
+        console.warn(`Не вдалося оновити погоду для ${city.name}:`, error);
+        return city;
+    }
+}
+
+// --- Крок 9: Рендер списку збережених міст із IndexedDB ---
+async function renderSavedCities() {
+    const cities = await getAllCities();
+    savedCitiesList.innerHTML = '';
+
+    if (cities.length === 0) {
+        savedCitiesList.innerHTML = '<p>Список збережених міст порожній.</p>';
+        return;
+    }
+
+    for (const city of cities) {
+        const card = document.createElement('article');
+        card.className = 'card';
+
+        const desc = city.weatherCode !== null ? (weatherCodesMap[city.weatherCode] || 'хмарно') : 'очікування...';
+        const tempText = city.temperature !== null
+            ? `${city.temperature > 0 ? '+' : ''}${city.temperature}°C`
+            : '—';
+        const timeText = city.time
+            ? new Date(city.time).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+            : 'немає даних';
+
+        card.innerHTML = `
+            <h3>${city.name}</h3>
+            <p class="temp temp-cold">${tempText}</p>
+            <p>${desc}</p>
+            <p style="font-size: 12px; color: #64748b; margin-top: 6px;">Оновлено: ${timeText}</p>
+            <button type="button" class="delete-city-btn" style="margin-top: 10px; cursor: pointer;">Видалити</button>
+        `;
+
+        card.querySelector('.delete-city-btn').addEventListener('click', async () => {
+            await deleteCity(city.id);
+            const remaining = await getAllCities();
+            saveToLocalStorage(remaining); // синхронізуємо з localStorage
+            await renderSavedCities();
+        });
+
+        savedCitiesList.append(card);
+    }
+}
+
+// --- Крок 3 і 9: Додавання нового міста з перевіркою через Geocoding API ---
+cityForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const inputName = document.querySelector('#city-name').value.trim();
+    dbErrorEl.style.display = 'none';
+
+    try {
+        // 1. Шукаємо реальне місто через Open-Meteo Geocoding API
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(inputName)}&count=1&language=uk&format=json`;
+        const geoResponse = await fetch(geoUrl);
+        if (!geoResponse.ok) {
+            throw new Error('Помилка сервісу пошуку міст');
+        }
+        const geoData = await geoResponse.json();
+
+        // Якщо місто не існує — зупиняємо додавання
+        if (!geoData.results || geoData.results.length === 0) {
+            dbErrorEl.textContent = `Місто «${inputName}» не знайдено. Перевірте правильність назви.`;
+            dbErrorEl.style.display = 'block';
+            return;
+        }
+
+        const found = geoData.results[0];
+
+        // 2. Перевіряємо, чи це місто вже є в IndexedDB
+        const existingCities = await getAllCities();
+        const isDuplicate = existingCities.some(
+            (c) => c.name.toLowerCase() === found.name.toLowerCase()
+        );
+        if (isDuplicate) {
+            dbErrorEl.textContent = `Місто «${found.name}» уже є у списку збережених.`;
+            dbErrorEl.style.display = 'block';
+            return;
+        }
+
+        // 3. Зберігаємо реальне місто з точними координатами
+        const newCity = {
+            id: Date.now(),
+            name: found.name,
+            lat: found.latitude,
+            lon: found.longitude,
+            temperature: null,
+            weatherCode: null,
+            time: null
+        };
+
+        await saveCity(newCity);
+        const allCities = await getAllCities();
+        saveToLocalStorage(allCities);
+        await renderSavedCities();
+
+        // Одразу підтягуємо свіжу погоду для доданого міста
+        await fetchCityWeather(newCity);
+        await renderSavedCities();
+        cityForm.reset();
+    } catch (error) {
+        console.error('Помилка збереження міста:', error);
+        dbErrorEl.textContent = 'Не вдалося перевірити або зберегти місто (перевірте інтернет-з’єднання).';
+        dbErrorEl.style.display = 'block';
+    }
+});
+
+// --- Ініціалізація при завантаженні сторінки (Кроки 8, 9, 11) ---
+async function initSavedCities() {
+    try {
+        await migrateFromLocalStorage();
+        // 1. Одразу показуємо збережені міста з IndexedDB
+        await renderSavedCities();
+
+        // 2. У фоні підтягуємо свіжий fetch для кожного міста і перемальовуємо
+        const cities = await getAllCities();
+        for (const city of cities) {
+            await fetchCityWeather(city);
+        }
+        await renderSavedCities();
+    } catch (error) {
+        console.error('Помилка відкриття IndexedDB:', error);
+        dbErrorEl.textContent = 'Локальна база даних IndexedDB недоступна (можливо, увімкнено приватний режим).';
+        dbErrorEl.style.display = 'block';
+    }
+}
+
+initSavedCities();

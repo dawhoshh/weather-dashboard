@@ -92,6 +92,24 @@
         </p>
         <p id="error-status" style="display: none; color: #B91C1C; font-weight: bold; margin-top: 10px;"></p>
     </section>
+    <section id="saved-cities-section" style="margin: 20px 0; padding: 15px; border: 1px solid #0284c7; border-radius: 8px; background: #ffffff;">
+        <h2>Збережені міста (localStorage / IndexedDB)</h2>
+
+        <!-- Повідомлення про помилку IndexedDB (Крок 11) -->
+        <p id="db-error" style="display: none; color: #B91C1C; font-weight: bold;"></p>
+
+        <!-- Форма додавання міста з перевіркою реального існування -->
+        <form id="city-form" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 16px;">
+            <div>
+                <label for="city-name">Назва міста:</label><br>
+                <input type="text" id="city-name" placeholder="Наприклад, Львів" required minlength="2" maxlength="50">
+            </div>
+            <button type="submit" style="padding: 8px 16px; cursor: pointer;">Додати місто</button>
+        </form>
+
+        <!-- Список збережених міст -->
+        <div id="saved-cities-list" class="cards"></div>
+    </section>
 </main>
 
 <footer>
