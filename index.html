@@ -91,6 +91,17 @@
             ⏳ Завантаження даних з сервера...
         </p>
         <p id="error-status" style="display: none; color: #B91C1C; font-weight: bold; margin-top: 10px;"></p>
+        <!-- Крок 3 і 7 (Практична №12): Canvas для анімованої іконки погоди -->
+        <div id="weather-canvas-wrapper" style="margin-top: 20px;">
+            <canvas id="weather-canvas" width="220" height="160"
+                    style="background: #e0f2fe; border-radius: 12px; border: 1px solid #0284c7; display: block; margin: 0 auto;"></canvas>
+            <p id="canvas-weather-label" style="font-weight: bold; margin: 8px 0;">
+                Поточний стан: очікування даних...
+            </p>
+            <button id="toggle-anim-btn" type="button" style="padding: 6px 14px; cursor: pointer;">
+                Пауза анімації
+            </button>
+        </div>
     </section>
     <section id="saved-cities-section" style="margin: 20px 0; padding: 15px; border: 1px solid #0284c7; border-radius: 8px; background: #ffffff;">
         <h2>Збережені міста (localStorage / IndexedDB)</h2>

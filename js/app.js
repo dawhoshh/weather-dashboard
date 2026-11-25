@@ -256,6 +256,7 @@ async function loadData() {
         // Витягуємо температуру, код погоди та час[cite: 21]
         const currentTemp = data.current.temperature_2m;
         const code = data.current.weather_code;
+        updateWeatherAnimation(code);
         const timeString = data.current.time;
 
         // Форматуємо час, щоб залишити тільки години та хвилини (наприклад, 23:00)
@@ -559,3 +560,178 @@ async function initSavedCities() {
 }
 
 initSavedCities();
+
+// КОД ДЛЯ 12-Ї ПРАКТИЧНОЇ РОБОТИ (Canvas API + requestAnimationFrame)
+
+// Крок 3: Отримуємо елемент <canvas> та 2D-контекст
+const weatherCanvas = document.querySelector('#weather-canvas');
+const ctx = weatherCanvas.getContext('2d');
+const canvasLabel = document.querySelector('#canvas-weather-label');
+const toggleAnimBtn = document.querySelector('#toggle-anim-btn');
+
+// Стан анімації
+let currentWeatherCode = 0; // за замовчуванням ясно
+let animationId = null;
+let isAnimating = true;
+let sunAngle = 0;
+let cloudOffset = 0;
+
+// Генеруємо частинки для дощу та снігу
+const particles = Array.from({ length: 28 }, () => ({
+    x: Math.random() * weatherCanvas.width,
+    y: Math.random() * weatherCanvas.height,
+    speed: 1.5 + Math.random() * 2.5,
+    length: 8 + Math.random() * 6
+}));
+
+// Визначаємо тип анімації за реальним weatherCode з Open-Meteo
+function getWeatherType(code) {
+    if (code === 0 || code === 1) return 'sun';
+    if (code === 51 || code === 61 || code === 95) return 'rain';
+    if (code === 71) return 'snow';
+    return 'cloud'; // 2, 3, 45, 48 або інші хмарні стани
+}
+
+// Малювання сонця, що обертається (із save/restore)
+function drawSun() {
+    const cx = weatherCanvas.width / 2;
+    const cy = weatherCanvas.height / 2;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(sunAngle);
+
+    // Промені сонця
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 12; i++) {
+        ctx.rotate((Math.PI * 2) / 12);
+        ctx.beginPath();
+        ctx.moveTo(34, 0);
+        ctx.lineTo(48, 0);
+        ctx.stroke();
+    }
+
+    // Коло сонця
+    ctx.beginPath();
+    ctx.arc(0, 0, 26, 0, Math.PI * 2);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fill();
+    ctx.restore();
+
+    sunAngle += 0.015;
+}
+
+// Малювання хмари, що плавно рухається
+function drawCloud(x, y, color = '#94a3b8') {
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.arc(x + 22, y - 10, 26, 0, Math.PI * 2);
+    ctx.arc(x + 48, y, 22, 0, Math.PI * 2);
+    ctx.fillRect(x, y, 48, 22);
+    ctx.fill();
+    ctx.restore();
+}
+
+// Малювання крапель дощу, що падають
+function drawRain() {
+    drawCloud(weatherCanvas.width / 2 - 24, 48, '#64748b');
+
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 2;
+    for (const drop of particles) {
+        ctx.beginPath();
+        ctx.moveTo(drop.x, drop.y);
+        ctx.lineTo(drop.x - 2, drop.y + drop.length);
+        ctx.stroke();
+
+        drop.y += drop.speed + 2;
+        if (drop.y > weatherCanvas.height) {
+            drop.y = 55;
+            drop.x = Math.random() * weatherCanvas.width;
+        }
+    }
+}
+
+// Малювання сніжинок, що падають
+function drawSnow() {
+    drawCloud(weatherCanvas.width / 2 - 24, 48, '#94a3b8');
+
+    ctx.fillStyle = '#ffffff';
+    for (const flake of particles) {
+        ctx.beginPath();
+        ctx.arc(flake.x, flake.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        flake.y += flake.speed * 0.6;
+        flake.x += Math.sin(flake.y * 0.05) * 0.7;
+        if (flake.y > weatherCanvas.height) {
+            flake.y = 55;
+            flake.x = Math.random() * weatherCanvas.width;
+        }
+    }
+}
+
+// Крок 5: Головний цикл анімації через requestAnimationFrame
+function animateWeather() {
+    // Обов'язкове очищення кадру
+    ctx.clearRect(0, 0, weatherCanvas.width, weatherCanvas.height);
+
+    const type = getWeatherType(currentWeatherCode);
+
+    if (type === 'sun') {
+        drawSun();
+    } else if (type === 'rain') {
+        drawRain();
+    } else if (type === 'snow') {
+        drawSnow();
+    } else {
+        // Плавний рух хмари вліво-вправо
+        const x = weatherCanvas.width / 2 - 24 + Math.sin(cloudOffset) * 18;
+        drawCloud(x, 85, '#64748b');
+        cloudOffset += 0.025;
+    }
+
+    if (isAnimating) {
+        animationId = requestAnimationFrame(animateWeather);
+    }
+}
+
+// Крок 4 і 6: Оновлення анімації за реальним weatherCode
+function updateWeatherAnimation(code) {
+    currentWeatherCode = code;
+    const desc = weatherCodesMap[code] || 'хмарно';
+    canvasLabel.textContent = `Анімація для weatherCode=${code} (${desc})`;
+}
+
+// Крок 7 і 8: Керування Старт/Пауза з коректним cancelAnimationFrame
+toggleAnimBtn.addEventListener('click', () => {
+    if (isAnimating) {
+        isAnimating = false;
+        cancelAnimationFrame(animationId);
+        toggleAnimBtn.textContent = 'Відновити анімацію';
+    } else {
+        isAnimating = true;
+        toggleAnimBtn.textContent = 'Пауза анімації';
+        animateWeather();
+    }
+});
+
+// Ініціалізація: беремо останній збережений weatherCode з IndexedDB (Практична №11)
+async function initWeatherCanvas() {
+    try {
+        const cities = await getAllCities();
+        if (cities.length > 0 && cities[0].weatherCode !== null) {
+            updateWeatherAnimation(cities[0].weatherCode);
+        } else {
+            updateWeatherAnimation(0);
+        }
+    } catch {
+        updateWeatherAnimation(0);
+    }
+    animateWeather();
+}
+
+initWeatherCanvas();
